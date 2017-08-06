@@ -20,6 +20,7 @@ class BidirectionalDiagram {
     this.initial = this.problem.initial;
     this.final = this.problem.final;
     this.textElement = textElement;
+    this.steps = 0;
 
     this.initialColor = 'hsl(0, 2%, 76%)';
     this.edgeColor = 'hsl(0, 2%, 80%)';
@@ -47,7 +48,6 @@ class BidirectionalDiagram {
       this.context.stroke();
       this.context.closePath();
     }
-
     //Initial Node
     this.context.fillStyle = this.sourceColor;
     this.context.beginPath();
@@ -65,8 +65,14 @@ class BidirectionalDiagram {
     this.steps++;
     this.textElement.text(this.steps);
     this.textElement.style('color', this.textColorScale(this.steps));
-    this.steps = 0;
     this.bfs();
+  }
+
+  incrementSteps() {
+    this.steps++;
+    //Update steps in the page
+    this.textElement.style('color', this.textColorScale(this.steps));
+    this.textElement.text(`${this.steps} nodes`);
   }
 
   colorNode(node, color) {
@@ -77,10 +83,6 @@ class BidirectionalDiagram {
       this.context.arc(this.nodes[node].x, this.nodes[node].y, this.nodeSize, 0, 2 * Math.PI, true);
       this.context.fill();
       this.context.closePath();
-      this.steps++;
-      //Update steps in the page
-      this.textElement.style('color', this.textColorScale(this.steps));
-      this.textElement.text(`${this.steps} nodes`);
     }
   }
 
@@ -89,10 +91,12 @@ class BidirectionalDiagram {
       let next = this.problem.iterate();
 
       if (next.source) {
-        this.colorNode(next.source, this.sourceBFSColor)
+        this.colorNode(next.source, this.sourceBFSColor);
+        this.incrementSteps();
       }
       if (next.dest) {
-        this.colorNode(next.dest, this.destBFSColor)
+        this.colorNode(next.dest, this.destBFSColor);
+        this.incrementSteps();
       }
       if (next.done) {
         clearInterval(this.intervalFunction)
@@ -115,6 +119,7 @@ class BFSDiagram extends BidirectionalDiagram {
     this.intervalFunction = setInterval(() => {
       let node = this.bfsAgent.step();
       this.colorNode(node, this.sourceBFSColor);
+      this.incrementSteps();
       if (node == this.final) {
         clearInterval(this.intervalFunction)
       }
